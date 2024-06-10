@@ -70,4 +70,4 @@ for i = 2:rows
 end
 
 friction_moment = nece_data;
-save('res/friction_moment.mat', 'friction_moment');
+%save('res/friction_moment.mat', 'friction_moment');
