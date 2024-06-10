@@ -7,6 +7,7 @@ clear;
 
 addpath('.', '-end');
 addpath('..', '-end');
+addpath('res', '-end');
 
 % ファイルの読み込み
 Friction_direction = readmatrix('../partially_friction_points.csv');
@@ -67,3 +68,6 @@ for i = 2:rows
     disp(data);
     nece_data = [nece_data; data];
 end
+
+friction_moment = nece_data;
+save('res/friction_moment.mat', 'friction_moment');
