@@ -20,7 +20,11 @@ rows = size(Friction_direction, 1);
 min_rows = size(mass, 2);
 cols = size(Friction_direction, 2);
 
+nece_data = [];
+
 for i = 2:rows
+    data = [];
+    data(end+1) = Friction_direction(i, 1);
     for j = 2:2:cols
         now_x = j;
         now_y = now_x+1;
@@ -57,6 +61,9 @@ for i = 2:rows
 
         %disp(friction_vector);
         %disp(neg_friction_vector);
-        disp(Ans);
+        %disp(Ans);
+        data(end+1) = Ans;
     end
+    disp(data);
+    nece_data = [nece_data; data];
 end
