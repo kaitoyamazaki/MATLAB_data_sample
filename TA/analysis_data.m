@@ -131,115 +131,115 @@ for i = 1:row
     trans_velocity_representative_points(i,:) = trans_v_rep;
 end
 
-%% 単位ベクトルを格納する配列を用意
-%unit_velocity_hand = zeros(row, hand_col);
-%unit_velocity_cog = zeros(row, cog_col);
-%unit_velocity_representative_points = zeros(row, representative_col);
+% 単位ベクトルを格納する配列を用意
+unit_velocity_hand = zeros(row, hand_col);
+unit_velocity_cog = zeros(row, cog_col);
+unit_velocity_representative_points = zeros(row, representative_col);
 
-%% 時間当たりの速度から単位ベクトルを計算
-%for i = 1:row
-    %% 最初にハンドの対しての処理
-    %norm_v_hand = sqrt(velocity_hand(i,1)^2 + velocity_hand(i,2)^2);
-    %uv_hand = velocity_hand(i,:) / norm_v_hand;
+% 時間当たりの速度から単位ベクトルを計算
+for i = 1:row
+    % 最初にハンドの対しての処理
+    norm_v_hand = sqrt(trans_velocity_hand(i,1)^2 + trans_velocity_hand(i,2)^2);
+    uv_hand = trans_velocity_hand(i,:) / norm_v_hand;
 
-    %% 次に重心に対しての処理
-    %norm_v_cog = sqrt(velocity_cog(i,1)^2 + velocity_cog(i,2)^2);
-    %uv_cog = velocity_cog(i,:) / norm_v_cog;
+    % 次に重心に対しての処理
+    norm_v_cog = sqrt(trans_velocity_cog(i,1)^2 + trans_velocity_cog(i,2)^2);
+    uv_cog = trans_velocity_cog(i,:) / norm_v_cog;
 
-    %uv_data = zeros(1, 16);
-    %for j = 1:2:15
-        %v = [velocity_representative_points(i,j), velocity_representative_points(i,j+1)];
-        %norm_v = sqrt(v(1)^2 + v(2)^2);
-        %uv = v / norm_v; 
-        %uv_data(j) = uv(1);
-        %uv_data(j+1) = uv(2);
-    %end
+    uv_data = zeros(1, 16);
+    for j = 1:2:15
+        v = [trans_velocity_representative_points(i,j), trans_velocity_representative_points(i,j+1)];
+        norm_v = sqrt(v(1)^2 + v(2)^2);
+        uv = v / norm_v; 
+        uv_data(j) = uv(1);
+        uv_data(j+1) = uv(2);
+    end
 
-    %unit_velocity_hand(i, :) = uv_hand;
-    %unit_velocity_cog(i, :) = uv_cog;
-    %unit_velocity_representative_points(i, :) = uv_data;
-%end
+    unit_trans_velocity_hand(i, :) = uv_hand;
+    unit_trans_velocity_cog(i, :) = uv_cog;
+    unit_velocity_representative_points(i, :) = uv_data;
+end
 
-%unit_velocity_hand(isnan(unit_velocity_hand)) = 0;
-%unit_velocity_cog(isnan(unit_velocity_cog)) = 0;
-%unit_velocity_representative_points(isnan(unit_velocity_representative_points)) = 0;
+unit_velocity_hand(isnan(unit_velocity_hand)) = 0;
+unit_velocity_cog(isnan(unit_velocity_cog)) = 0;
+unit_velocity_representative_points(isnan(unit_velocity_representative_points)) = 0;
 
-%% 摩擦力の配列をそれぞれ用意
-%friction_hand = zeros(row, hand_col);
-%friction_cog = zeros(row, cog_col);
-%friction_representative_points = zeros(row, representative_col);
+% 摩擦力の配列をそれぞれ用意
+friction_hand = zeros(row, hand_col);
+friction_cog = zeros(row, cog_col);
+friction_representative_points = zeros(row, representative_col);
 
-%% 単位ベクトルの値から摩擦力を計算
-%for i = 1:row
-    %f_hand = -friction_obj * unit_velocity_hand(i, :);
-    %f_cog = -friction_obj * unit_velocity_cog(i, :);
+% 単位ベクトルの値から摩擦力を計算
+for i = 1:row
+    f_hand = -friction_obj * unit_velocity_hand(i, :);
+    f_cog = -friction_obj * unit_velocity_cog(i, :);
 
-    %friction_data = zeros(1, 16);
-    %for j = 1:2:15
-        %v = [unit_velocity_representative_points(i,j), unit_velocity_representative_points(i, j+1)];
-        %f_col = idivide(int32(j),2)+1;
-        %f_rep = -friction(f_col) * v;
-        %friction_data(j) = f_rep(1);
-        %friction_data(j+1) = f_rep(2);
-    %end
+    friction_data = zeros(1, 16);
+    for j = 1:2:15
+        v = [unit_velocity_representative_points(i,j), unit_velocity_representative_points(i, j+1)];
+        f_col = idivide(int32(j),2)+1;
+        f_rep = -friction(f_col) * v;
+        friction_data(j) = f_rep(1);
+        friction_data(j+1) = f_rep(2);
+    end
 
-    %friction_hand(i, :) = f_hand;
-    %friction_cog(i, :) = f_cog;
-    %friction_representative_points(i, :) = friction_data;
-%end
+    friction_hand(i, :) = f_hand;
+    friction_cog(i, :) = f_cog;
+    friction_representative_points(i, :) = friction_data;
+end
 
-%% 摩擦力のデータからモーメントを計算. その結果を格納するための変数を用意
-%moment_hand = zeros(row, 1);
-%moment_cog = zeros(row, 1);
-%moment_representative_points = zeros(row, 8);
+% 摩擦力のデータからモーメントを計算. その結果を格納するための変数を用意
+moment_hand = zeros(row, 1);
+moment_cog = zeros(row, 1);
+moment_representative_points = zeros(row, 8);
 
-%for i = 1:row
-    %pos_vec_hand = hand_pos(i, :) - hand_pos(i, :);
-    %pos_vec_hand = [pos_vec_hand, 0];
-    %pos_vec_cog = cog_pos(i, :) - hand_pos(i, :);
-    %pos_vec_cog = [pos_vec_cog, 0];
+for i = 1:row
+    pos_vec_hand = hand_pos(i, :) - hand_pos(i, :);
+    pos_vec_hand = [pos_vec_hand, 0];
+    pos_vec_cog = cog_pos(i, :) - hand_pos(i, :);
+    pos_vec_cog = [pos_vec_cog, 0];
 
-    %f_hand = [friction_hand(i, :), 0];
-    %f_cog = [friction_cog(i, :), 0];
+    f_hand = [friction_hand(i, :), 0];
+    f_cog = [friction_cog(i, :), 0];
 
-    %m_hand = cross(pos_vec_hand, f_hand);
-    %m_hand = m_hand(3);
-    %m_cog = cross(pos_vec_cog, f_cog);
-    %m_cog = m_cog(3);
+    m_hand = cross(pos_vec_hand, f_hand);
+    m_hand = m_hand(3);
+    m_cog = cross(pos_vec_cog, f_cog);
+    m_cog = m_cog(3);
 
-    %m_data = zeros(1, 8);
-    %for j = 1:2:15
-        %m_col = idivide(int32(j),2)+1;
-        %pos_vec_rep  = [representative_pos(i, j), representative_pos(i, j+1)] - hand_pos(i,:);
-        %pos_vec_rep = [pos_vec_rep, 0];
-        %f_rep = [friction_representative_points(i, j), friction_representative_points(i, j+1), 0];
-        %m_rep = cross(pos_vec_rep, f_rep);
-        %m_rep = m_rep(3);
-        %m_data(m_col) = m_rep;
-    %end
+    m_data = zeros(1, 8);
+    for j = 1:2:15
+        m_col = idivide(int32(j),2)+1;
+        pos_vec_rep  = [representative_pos(i, j), representative_pos(i, j+1)] - hand_pos(i,:);
+        pos_vec_rep = [pos_vec_rep, 0];
+        f_rep = [friction_representative_points(i, j), friction_representative_points(i, j+1), 0];
+        m_rep = cross(pos_vec_rep, f_rep);
+        m_rep = m_rep(3);
+        m_data(m_col) = m_rep;
+    end
 
-    %moment_hand(i,:) = m_hand;
-    %moment_cog(i, :) = m_cog;
-    %moment_representative_points(i, :) = m_data;
-%end
+    moment_hand(i,:) = m_hand;
+    moment_cog(i, :) = m_cog;
+    moment_representative_points(i, :) = m_data;
+end
 
-%save('use_data/time_typeA1.mat', 'time');
-%save('use_data/hand_pos_typeA1.mat', 'hand_pos');
-%save('use_data/cog_pos_typeA1.mat', 'cog_pos');
-%save('use_data/representative_pos_typeA1.mat', 'representative_pos');
-%save('use_data/dp_time_typeA1.mat', 'dp_time');
-%save('use_data/dp_hand_pos_typeA1.mat', 'dp_hand_pos');
-%save('use_data/dp_cog_pos_typeA1.mat', 'dp_cog_pos');
-%save('use_data/dp_representative_pos_typeA1.mat', 'dp_representative_pos');
-%save('use_data/velocity_hand_typeA1.mat', 'velocity_hand');
-%save('use_data/velocity_cog_typeA1.mat', 'velocity_cog');
-%save('use_data/velocity_representative_points_typeA1.mat', 'velocity_representative_points');
-%save('use_data/unit_velocity_hand_typeA1.mat', 'unit_velocity_hand');
-%save('use_data/unit_velocity_cog_typeA1.mat', 'unit_velocity_cog');
-%save('use_data/unit_velocity_representative_points_typeA1.mat', 'unit_velocity_representative_points');
-%save('use_data/friction_hand_typeA1.mat', 'friction_hand');
-%save('use_data/friction_cog_typeA1.mat', 'friction_cog');
-%save('use_data/friction_representative_points_typeA1.mat', 'friction_representative_points');
-%save('use_data/moment_hand_typeA1.mat', 'moment_hand');
-%save('use_data/moment_cog_typeA1.mat', 'moment_cog');
-%save('use_data/moment_representative_points_typeA1.mat', 'moment_representative_points');
+save('use_data/time_typeA1.mat', 'time');
+save('use_data/hand_pos_typeA1.mat', 'hand_pos');
+save('use_data/cog_pos_typeA1.mat', 'cog_pos');
+save('use_data/representative_pos_typeA1.mat', 'representative_pos');
+save('use_data/dp_time_typeA1.mat', 'dp_time');
+save('use_data/dp_hand_pos_typeA1.mat', 'dp_hand_pos');
+save('use_data/dp_cog_pos_typeA1.mat', 'dp_cog_pos');
+save('use_data/dp_representative_pos_typeA1.mat', 'dp_representative_pos');
+save('use_data/velocity_hand_typeA1.mat', 'velocity_hand');
+save('use_data/velocity_cog_typeA1.mat', 'velocity_cog');
+save('use_data/velocity_representative_points_typeA1.mat', 'velocity_representative_points');
+save('use_data/unit_velocity_hand_typeA1.mat', 'unit_velocity_hand');
+save('use_data/unit_velocity_cog_typeA1.mat', 'unit_velocity_cog');
+save('use_data/unit_velocity_representative_points_typeA1.mat', 'unit_velocity_representative_points');
+save('use_data/friction_hand_typeA1.mat', 'friction_hand');
+save('use_data/friction_cog_typeA1.mat', 'friction_cog');
+save('use_data/friction_representative_points_typeA1.mat', 'friction_representative_points');
+save('use_data/moment_hand_typeA1.mat', 'moment_hand');
+save('use_data/moment_cog_typeA1.mat', 'moment_cog');
+save('use_data/moment_representative_points_typeA1.mat', 'moment_representative_points');
